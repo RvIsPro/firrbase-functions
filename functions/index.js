@@ -40,25 +40,25 @@ const fileTypes = {
 // // https://firebase.google.com/docs/functions/get-started
 //
 
-const b64toBlob = (b64Data, contentType = 'application/octet-stream', sliceSize = 512) => {
-    const byteCharacters = atob(b64Data);
-    const byteArrays = [];
+// const b64toBlob = (b64Data, contentType = 'application/octet-stream', sliceSize = 512) => {
+//     const byteCharacters = atob(b64Data);
+//     const byteArrays = [];
 
-    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-        const slice = byteCharacters.slice(offset, offset + sliceSize);
+//     for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+//         const slice = byteCharacters.slice(offset, offset + sliceSize);
 
-        const byteNumbers = new Array(slice.length);
-        for (let i = 0; i < slice.length; i++) {
-            byteNumbers[i] = slice.charCodeAt(i);
-        }
+//         const byteNumbers = new Array(slice.length);
+//         for (let i = 0; i < slice.length; i++) {
+//             byteNumbers[i] = slice.charCodeAt(i);
+//         }
 
-        const byteArray = new Uint8Array(byteNumbers);
-        byteArrays.push(byteArray);
-    }
+//         const byteArray = new Uint8Array(byteNumbers);
+//         byteArrays.push(byteArray);
+//     }
 
-    const blob = new Blob(byteArrays, { type: contentType });
-    return blob;
-}
+//     const blob = new Blob(byteArrays, { type: contentType });
+//     return blob;
+// }
 
 const createDownloadUrl = (baseUrl, bucket_baseurl, bucket_id, pathToFile, downloadToken) => {
     return `https://firebasestorage.googleapis.com/v0${bucket_baseurl}/${bucket_id}/o/${encodeURIComponent(pathToFile)}?alt=media&token=${downloadToken}`;
@@ -231,7 +231,7 @@ exports.convertAndStoreData = functions.https.onRequest(async (request, response
 
         // const doc_uid = uuid;
 
-        admin.firestore().collection('log').doc().create(docData)
+        admin.firestore().collection('new').doc().create(docData)
 
         response.json({
             status: true,
