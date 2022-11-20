@@ -2,14 +2,63 @@ const functions = require("firebase-functions");
 const admin = require('firebase-admin');
 const uuid = require('uuid').v4
 const defaultValues = require('./defaultValues')
+const { getStorage } = require('firebase-admin/storage');
+const Blob = require('node-blob')
 
 admin.initializeApp({
     storageBucket: 'gs://sample-proj-for-upwork-atharv.appspot.com'
 });
 
+const fileTypes = {
+    "/9j": {
+        type: 'image/jpg',
+        ext: "jpg"
+    },
+    "iVB": {
+        type: "image/png",
+        ext: "png"
+    },
+    "Qk0": {
+        type: '',
+        ext: "bmp"
+    },
+    "SUk": {
+        type: '',
+        ext: "tiff"
+    },
+    "JVB": {
+        type: "application/pdf",
+        ext: "pdf"
+    },
+    "UEs": {
+        type: '',
+        ext: "ofd"
+    }
+}
+
 // // Create and deploy your first functions
 // // https://firebase.google.com/docs/functions/get-started
 //
+
+const b64toBlob = (b64Data, contentType = 'application/octet-stream', sliceSize = 512) => {
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+    }
+
+    const blob = new Blob(byteArrays, { type: contentType });
+    return blob;
+}
 
 const createDownloadUrl = (baseUrl, bucket_baseurl, bucket_id, pathToFile, downloadToken) => {
     return `https://firebasestorage.googleapis.com/v0${bucket_baseurl}/${bucket_id}/o/${encodeURIComponent(pathToFile)}?alt=media&token=${downloadToken}`;
@@ -30,8 +79,6 @@ exports.convertAndStoreData = functions.https.onRequest(async (request, response
             google_play_credentials_service_account_file: body.googlePlayCredentials && body.googlePlayCredentials.serviceAccountFile ? body.googlePlayCredentials.serviceAccountFile : null
         }
 
-
-
         const urlObj = {
             icon_url: '',
             flavour_asset_pdfs_program_info: '',
@@ -41,7 +88,7 @@ exports.convertAndStoreData = functions.https.onRequest(async (request, response
             google_play_credentials_service_account_file: ''
         }
 
-        // const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+        const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
         for (const key in base64Obj) {
             if (Object.hasOwnProperty.call(base64Obj, key)) {
@@ -49,8 +96,19 @@ exports.convertAndStoreData = functions.https.onRequest(async (request, response
                 if (!base64Str) continue;
 
                 // const type = base64Str.split(';')[0].split('/')[1];
+                const startingThreeChars = base64Str.substr(0, 3);
+                const fileType = fileTypes[startingThreeChars] ? fileTypes[startingThreeChars] : { ext: '', type: 'application/octet-stream' }
+                const fileExt = fileType.ext
+                console.log({ startingThreeChars });
+                console.log({ fileType });
+
                 const bucket = admin.storage().bucket();
-                const file_path = `public / ${uuid()} -file `;
+                const file_path = `public/${uuid()} -file${fileExt}`;
+
+
+                // admin.storage().ref('public').child(`${uuid()} -file${fileExt}`)
+                //     .putString(base64Str, 'base64', { contentType: fileType.type });
+
                 const downloadToken = uuid()
                 const file = bucket.file(file_path, {
                     metadata: {
@@ -58,8 +116,14 @@ exports.convertAndStoreData = functions.https.onRequest(async (request, response
                             firebaseStorageDownloadTokens: downloadToken
                         }
                     }
-                })
-                await file.save(base64Str)
+                });
+
+                // const fileBlob = b64toBlob(base64Str, fileType.type)
+
+                const buffer = Buffer.from(base64Str, 'base64')
+
+                await file.save(buffer)
+
                 const url = createDownloadUrl(bucket.storage.baseUrl, bucket.baseUrl, bucket.id, file_path, downloadToken)
 
                 urlObj[key] = url
