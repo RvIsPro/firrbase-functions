@@ -1,40 +1,46 @@
-const functions = require("firebase-functions");
-const admin = require('firebase-admin');
-const uuid = require('uuid').v4
-const defaultValues = require('./defaultValues')
-const { getStorage } = require('firebase-admin/storage');
-const Blob = require('node-blob')
+// const functions = require("firebase-functions");
+// const admin = require('firebase-admin');
+// const uuid = require('uuid').v4
+// const defaultValues = require('./defaultValues')
+// const { fileTypeFromBuffer } = require('file-type')
+
+import functions from "firebase-functions";
+import admin from 'firebase-admin';
+import { v4 as uuid } from 'uuid'
+import defaultValues  from './defaultValues.js'
+import { fileTypeFromBuffer } from 'file-type'
+
 
 admin.initializeApp({
     storageBucket: 'gs://sample-proj-for-upwork-atharv.appspot.com'
 });
 
-const fileTypes = {
-    "/9j": {
-        type: 'image/jpg',
-        ext: "jpg"
-    },
-    "iVB": {
-        type: "image/png",
-        ext: "png"
-    },
-    "Qk0": {
-        type: '',
-        ext: "bmp"
-    },
-    "SUk": {
-        type: '',
-        ext: "tiff"
-    },
-    "JVB": {
-        type: "application/pdf",
-        ext: "pdf"
-    },
-    "UEs": {
-        type: '',
-        ext: "ofd"
-    }
-}
+// const fileTypes = {
+//     "/9j": {
+//         type: 'image/jpg',
+//         ext: "jpg"
+//     },
+//     "iVB": {
+//         type: "image/png",
+//         ext: "png"
+//     },
+//     "Qk0": {
+//         type: '',
+//         ext: "bmp"
+//     },
+//     "SUk": {
+//         type: '',
+//         ext: "tiff"
+//     },
+//     "JVB": {
+//         type: "application/pdf",
+//         ext: "pdf"
+//     },
+//     "UEs": {
+//         type: '',
+//         ext: "ofd"
+//     }
+// }
 
 // // Create and deploy your first functions
 // // https://firebase.google.com/docs/functions/get-started
@@ -64,7 +70,7 @@ const createDownloadUrl = (baseUrl, bucket_baseurl, bucket_id, pathToFile, downl
     return `https://firebasestorage.googleapis.com/v0${bucket_baseurl}/${bucket_id}/o/${encodeURIComponent(pathToFile)}?alt=media&token=${downloadToken}`;
 };
 
-exports.convertAndStoreData = functions.https.onRequest(async (request, response) => {
+export const onvertAndStoreData = functions.https.onRequest(async (request, response) => {
 
     try {
 
@@ -88,7 +94,7 @@ exports.convertAndStoreData = functions.https.onRequest(async (request, response
             google_play_credentials_service_account_file: ''
         }
 
-        const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+        // const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
         for (const key in base64Obj) {
             if (Object.hasOwnProperty.call(base64Obj, key)) {
@@ -96,31 +102,30 @@ exports.convertAndStoreData = functions.https.onRequest(async (request, response
                 if (!base64Str) continue;
 
                 // const type = base64Str.split(';')[0].split('/')[1];
-                const startingThreeChars = base64Str.substr(0, 3);
-                const fileType = fileTypes[startingThreeChars] ? fileTypes[startingThreeChars] : { ext: '', type: 'application/octet-stream' }
-                const fileExt = fileType.ext
-                console.log({ startingThreeChars });
-                console.log({ fileType });
+                // const startingThreeChars = base64Str.substr(0, 3);
+                // const fileType = fileTypes[startingThreeChars] ? fileTypes[startingThreeChars] : { ext: '', type: 'application/octet-stream' }
+                // const fileExt = fileType.ext
+
+
+
+                // const fileBlob = b64toBlob(base64Str, fileType.type)
+
+                const buffer = Buffer.from(base64Str, 'base64')
+
+                const filType = await fileTypeFromBuffer(buffer)
+
 
                 const bucket = admin.storage().bucket();
-                const file_path = `public/${uuid()} -file${fileExt}`;
-
-
-                // admin.storage().ref('public').child(`${uuid()} -file${fileExt}`)
-                //     .putString(base64Str, 'base64', { contentType: fileType.type });
+                const file_path = `public/${uuid()} -file${filType.ext}`;
 
                 const downloadToken = uuid()
                 const file = bucket.file(file_path, {
                     metadata: {
                         metadata: {
-                            firebaseStorageDownloadTokens: downloadToken
+                            firebaseStorageDownloadTokens: downloadToken,
                         }
                     }
                 });
-
-                // const fileBlob = b64toBlob(base64Str, fileType.type)
-
-                const buffer = Buffer.from(base64Str, 'base64')
 
                 await file.save(buffer)
 
