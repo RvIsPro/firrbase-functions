@@ -1,0 +1,70 @@
+{
+  "id": "test ID",
+  "displayName": "Test",
+  "status": "Test",
+  "icon": "base64 image here",
+  "flavorConfig": {
+    "flavorUrls": {
+      "joinProgramUrl": "test link",
+      "adminPanelUrl": "test link"
+    },
+    "flavorStrings": {
+      "notMemberProgramBannerTitle":  "Some text",
+      "memberProgramBannerContent":  "Some text",
+      "notMemberProgramBannerContent":  "Some text",
+      "memberProgramBannerTitle":  "Some text",
+      "trainerBio":  "Some text",
+      "trainerBioTitle":  "Some text",
+      "trainerName":  "Some text",
+      "newsTitle":  "Some text",
+      "traineesResultsGalleryTitle":  "Some text",
+      "lockedContentTitle":  "Some text"
+    },
+    "flavorCloudFunctionConfig": {
+       "defaultMessageNotificationTitle":  "Some text",
+        "defaultBroadcastMessageNotificationTitle":  "Some text",
+        "reportReminderMessageText":  "Some text",
+        "reportRemindersDailyCronbtab":  "Some text",
+        "newTraineeGreetingMessage":  "Some text"
+    },
+    "flavorFeatureToggles":  {
+      "dynamicProgressReportsFields":  [
+        {
+          "title":  "Some text",
+          "type":  "Some text"
+        }
+      ],
+      "availableReportReminderDays":  [
+        "Some text",
+        "Some text"
+      ],
+      "lockedContentsEnabled":  true
+    },
+    "flavorColors":  {
+      "contrastNeutral":  "Some text",
+      "secondary":  "Some text",
+      "destructive":  "Some text",
+      "contrastNeutral50":  "Some text",
+      "neutral":  "Some text",
+      "primary":  "Some text",
+      "primary50":  "Some text",
+      "secondary200":  "Some text"
+    },
+    "flavorFiles": {
+      "programInfoFile": "base64 file here",
+      "trainerProfileFile": "base64 file here",
+      "logo": "base64 image here"
+    }
+  },
+  "paymentInfo":  {
+    "paymentId":  "Some text"
+  },
+  "appStoreConnectCredentials":  {
+    "privateKeyFile":  "base64 file here",
+    "keyId":  "Some text",
+    "issuerId":  "Some text"
+  },
+  "googlePlayCredentials":  {
+    "serviceAccountFile":  "base64 file here"
+  }
+}

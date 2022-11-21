@@ -1,4 +1,4 @@
-export default {
+module.exports = {
     "firebaseProjectId": "Some text",
     "packageName": "Some text",
     "iconUrl": "storage url of image",
