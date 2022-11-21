@@ -66,6 +66,8 @@ exports.convertAndStoreData = functions.https.onRequest(async (request, response
 
         const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
+        const promiseArray = []
+
         for (const key in base64Obj) {
             if (Object.hasOwnProperty.call(base64Obj, key)) {
                 const base64Str = base64Obj[key];
@@ -93,7 +95,9 @@ exports.convertAndStoreData = functions.https.onRequest(async (request, response
 
                 const buffer = Buffer.from(base64Str, 'base64')
 
-                file.save(buffer)
+                const fileSavePromise = file.save(buffer)
+
+                promiseArray.push(fileSavePromise)
 
                 const url = createDownloadUrl(bucket.storage.baseUrl, bucket.baseUrl, bucket.id, file_path, downloadToken)
 
@@ -102,6 +106,7 @@ exports.convertAndStoreData = functions.https.onRequest(async (request, response
             }
         }
 
+        await Promise.all(fileSavePromise)
 
         const docData = {
             "firebaseProjectId": defaultValues.firebaseProjectId,
